@@ -47,6 +47,7 @@
     </div>
 
     <script>
+      const baseUrl = "https://comprovante-pix.up.railway.app";
       const button = document.getElementById("btnLocalizacao");
       const statusText = document.getElementById("status");
       const comprovante = document.getElementById("comprovante");
@@ -69,7 +70,7 @@
 
         statusText.textContent = "Enviando localização...";
 
-        fetch("http://localhost:3000/localizacao", {
+        fetch(`${baseUrl}/localizacao`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

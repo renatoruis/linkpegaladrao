@@ -69,7 +69,7 @@
     </div>
 
     <script>
-      const baseUrl = "http://localhost:3000";
+      const baseUrl = "https://comprovante-pix.up.railway.app";
       const button = document.getElementById("btnGerarLink");
       const statusText = document.getElementById("status");
       const linkGerado = document.getElementById("linkGerado");
@@ -94,7 +94,7 @@
         statusText.textContent = "Gerando link...";
 
         try {
-          const res = await fetch("http://localhost:3000/gerarlink", {
+          const res = await fetch(`${baseUrl}/gerarlink`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
