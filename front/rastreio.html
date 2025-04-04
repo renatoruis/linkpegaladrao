@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rastreio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-[#820ad1] text-white font-sans min-h-screen flex flex-col justify-center items-center px-4"
+  >
+    <div id="container-permissao" class="w-full max-w-2xl">
+      <div class="flex justify-center mb-8">
+        <p class="text-2xl text-white">Pega ladrão!</p>
+      </div>
+
+      <h1 class="text-xl font-bold text-center mb-4">
+        Rastreio de localização
+      </h1>
+
+      <% if (!address || !address.lat || !address.lon) { %>
+      <div
+        class="bg-white text-[#820ad1] p-4 rounded-xl text-center w-full mb-6"
+      >
+        <p class="mb-4">
+          Localização ainda não disponível. Aguarde alguns segundos e atualize a
+          página.
+        </p>
+        <button
+          onclick="location.reload()"
+          class="bg-[#820ad1] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#6f0abb] transition"
+        >
+          Atualizar página
+        </button>
+        <button
+          onclick="location.href='/gerarlink'"
+          class="bg-[#820ad1] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#6f0abb] transition"
+        >
+          Voltar para a página de geração de link
+        </button>
+      </div>
+      <% } else { %>
+      <!-- Mapa embutido -->
+      <div class="rounded-xl overflow-hidden shadow-lg mb-6">
+        <iframe
+          src="https://www.google.com/maps?q=<%= address.lat %>,<%= address.lon %>&output=embed"
+          width="100%"
+          height="400"
+          style="border: 0"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+
+      <!-- Endereço formatado -->
+      <div class="bg-white text-[#820ad1] p-4 rounded-xl text-sm w-full">
+        <p><strong>Local aproximado:</strong> <%= address.nome %></p>
+        <p>
+          <strong>Endereço:</strong> <%= address.rua %>, <%= address.bairro %>
+        </p>
+        <p>
+          <strong>Cidade:</strong> <%= address.cidade %> - <%= address.estado %>
+        </p>
+        <p><strong>CEP:</strong> <%= address.cep %></p>
+      </div>
+      <div class="bg-white text-[#820ad1] p-4 rounded-xl text-sm w-full mt-4">
+        Atenção, este endereço é aproximado na melhor das hipóteses.
+      </div>
+      <% } %>
+    </div>
+  </body>
+</html>

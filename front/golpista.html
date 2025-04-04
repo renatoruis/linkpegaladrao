@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🚨 Alerta de Segurança</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-red-700 text-white font-sans min-h-screen flex flex-col justify-center items-center px-4"
+  >
+    <div
+      class="bg-red-700 animate-pulse w-full rounded-xl p-6 flex flex-col gap-6 text-center"
+    >
+      <h1 class="text-3xl font-extrabold text-white">🚨 Pegamos você! 🚨</h1>
+      <p class="text-xl">Celular rastreado com sucesso!</p>
+
+      <!-- Endereço formatado -->
+      <div
+        id="endereco-formatado"
+        class="bg-red-800 p-4 rounded-lg text-sm text-white shadow-md text-left"
+      ></div>
+
+      <!-- Mapa -->
+      <div class="w-full">
+        <iframe
+          id="mapa"
+          class="rounded-lg border border-red-900 w-full"
+          height="200"
+          frameborder="0"
+          style="border: 0"
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
+      </div>
+
+      <p class="text-base font-bold text-white">
+        🚔 A polícia já foi acionada.
+      </p>
+
+      <!-- Sirene -->
+      <audio id="sirene" loop>
+        <source src="sirene.mp3" type="audio/mpeg" />
+      </audio>
+
+      <p class="text-xs text-white/60 mt-2">Rastreado via OpenStreetMap API</p>
+    </div>
+
+    <script>
+      const enderecoStr = localStorage.getItem("enderecoPegadinha");
+      const lat = localStorage.getItem("latitudePegadinha");
+      const lon = localStorage.getItem("longitudePegadinha");
+
+      try {
+        const endereco = JSON.parse(enderecoStr);
+        const parsed = `
+          <strong>Local Aproximado:</strong> ${endereco.nome}<br>
+          <strong>Rua:</strong> ${endereco.rua}<br>
+          <strong>Bairro:</strong> ${endereco.bairro}<br>
+          <strong>Cidade:</strong> ${endereco.cidade} - ${endereco.estado}<br>
+          <strong>CEP:</strong> ${endereco.cep}<br>
+          <strong>País:</strong> ${endereco.pais}
+        `;
+        document.getElementById("endereco-formatado").innerHTML = parsed;
+      } catch (e) {
+        document.getElementById("endereco-formatado").textContent =
+          "Endereço não identificado.";
+      }
+
+      if (lat && lon) {
+        const mapa = document.getElementById("mapa");
+        mapa.src = `https://www.google.com/maps?q=${lat},${lon}&output=embed`;
+      }
+
+      const sirene = document.getElementById("sirene");
+
+      window.addEventListener("load", () => {
+        sirene.play();
+      });
+    </script>
+  </body>
+</html>

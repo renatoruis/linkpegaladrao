@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerar link de rastreio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body
+    class="bg-[#820ad1] text-white font-sans min-h-screen flex flex-col justify-center items-center px-4"
+  >
+    <!-- Tela inicial -->
+    <div id="container-gerarlink" class="w-full">
+      <div class="flex justify-center mb-8">
+        <p class="text-2xl font-bold text-white text-center mb-4">
+          Link Pega ladrão!
+        </p>
+      </div>
+      <h1 class="text-2xl font-bold text-center mb-4">
+        Gerar link de rastreio
+      </h1>
+      <p class="text-center text-sm text-white/80 mb-6">
+        Clique no botão abaixo para gerar um link de rastreio.
+      </p>
+      <button
+        id="btnGerarLink"
+        class="bg-white text-[#820ad1] hover:bg-gray-100 font-bold py-4 px-6 rounded-xl w-full transition text-lg"
+      >
+        Gerar link
+      </button>
+      <p id="status" class="text-center text-sm text-white mt-4"></p>
+    </div>
+
+    <!-- Tela do link gerado -->
+    <div id="linkGerado" class="hidden w-full text-center">
+      <div class="flex justify-center mb-8">
+        <p class="text-2xl font-bold text-white text-center mb-4">
+          Link Pega ladrão!
+        </p>
+      </div>
+
+      <h2 class="text-2xl font-semibold text-white/90 mb-4">
+        ✅ Link gerado com sucesso!
+      </h2>
+      <p class="text-center text-sm text-white/80 mb-6">
+        Clique no botão abaixo para copiar o link do comprovante fake.
+      </p>
+      <p id="link" class="text-white/90 mb-4"></p>
+      <button
+        id="btnCopiarLink"
+        class="bg-white text-[#820ad1] hover:bg-gray-100 font-bold py-4 px-6 rounded-xl w-full transition text-lg my-4"
+      >
+        <i class="fa-solid fa-clipboard"></i> Copiar link do comprovante
+      </button>
+
+      <button
+        id="btnRastreio"
+        class="bg-white text-[#820ad1] hover:bg-gray-100 font-bold py-4 px-6 rounded-xl w-full transition text-lg my-4"
+      >
+        <i class="fa-solid fa-location-dot"></i> Acompanhar rastreio
+      </button>
+    </div>
+
+    <script>
+      const baseUrl = "http://localhost:3000";
+      const button = document.getElementById("btnGerarLink");
+      const statusText = document.getElementById("status");
+      const linkGerado = document.getElementById("linkGerado");
+      const containerGerarLink = document.getElementById("container-gerarlink");
+      const link = document.getElementById("link");
+      const btnCopiarLink = document.getElementById("btnCopiarLink");
+      const btnRastreio = document.getElementById("btnRastreio");
+      //verifica se o link já existe no localStorage
+      if (localStorage.getItem("link")) {
+        containerGerarLink.classList.add("hidden");
+        linkGerado.classList.remove("hidden");
+        link.textContent = `${baseUrl}/comprovante/${localStorage.getItem(
+          "link"
+        )}`;
+      }
+
+      btnRastreio.addEventListener("click", () => {
+        window.location.href = `/rastreio/${localStorage.getItem("link")}`;
+      });
+
+      async function gerarLink() {
+        statusText.textContent = "Gerando link...";
+
+        try {
+          const res = await fetch("http://localhost:3000/gerarlink", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const response = await res.json();
+          const linkID = response.link;
+          localStorage.setItem("link", linkID);
+
+          if (!linkID) throw new Error("Link inválido");
+
+          const finalLink = `${baseUrl}/comprovante/${linkID}`;
+
+          // Mostra o comprovante
+          containerGerarLink.classList.add("hidden");
+          linkGerado.classList.remove("hidden");
+
+          link.href = finalLink;
+          link.textContent = finalLink;
+        } catch (error) {
+          console.error("Erro ao gerar link:", error);
+          statusText.textContent = "Erro ao gerar link.";
+        }
+      }
+
+      button.addEventListener("click", gerarLink);
+      btnCopiarLink.addEventListener("click", copiarLink);
+      btnRastreio.addEventListener("click", () => {
+        window.location.href = `${baseUrl}/rastreio/${localStorage.getItem(
+          "link"
+        )}`;
+      });
+
+      function copiarLink() {
+        const link = document.getElementById("link").textContent;
+        navigator.clipboard.writeText(link);
+        btnCopiarLink.textContent = "Link copiado";
+      }
+    </script>
+  </body>
+</html>
